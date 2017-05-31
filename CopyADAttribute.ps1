@@ -16,7 +16,7 @@ catch
 
     write-host ("The below list of users are about to be altered:")
     foreach ($user in $users) {
-        write-host ($user.DistinguishedName)
+        write-host ($user.samaccountname)
     }
     $confirm = read-host ("Are you sure? y/N")
 
