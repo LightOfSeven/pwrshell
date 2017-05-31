@@ -15,7 +15,10 @@ catch
     $users = Get-ADUser -LDAPFilter "($originalfield=*)" -Properties $originalfield, $changefield
 
     write-host ("The below list of users are about to be altered:")
-    write-host ($users)
+    foreach {
+        ($user in $users)
+        write-host ($user.DistinguishedName)
+    }
     $confirm = read-host ("Are you sure? y/N")
 
 # Changes the value of each users $changefield in the $users variable to $originalfield
@@ -26,7 +29,10 @@ if ($confirm -eq "y") {
         ForEach-Object {Set-ADObject -Identity $user.DistinguishedName -Replace @{$changefield=$($user.$originalfield)}}
         # Optional output for per-user completion
         # Write-Output ("$user.DistinguishedName processed")}
+    }
     Write-Host ("Script completed for user selection.")
                                 }
-    else{Write-Host ("Detected non-confirmation input, exiting...")}
+else {
+        Write-Host ("Detected non-confirmation input, exiting...")
+    }
 }
