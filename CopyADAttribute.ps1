@@ -15,8 +15,7 @@ catch
     $users = Get-ADUser -LDAPFilter "($originalfield=*)" -Properties $originalfield, $changefield
 
     write-host ("The below list of users are about to be altered:")
-    foreach {
-        ($user in $users)
+    foreach ($user in $users) {
         write-host ($user.DistinguishedName)
     }
     $confirm = read-host ("Are you sure? y/N")
@@ -35,4 +34,3 @@ if ($confirm -eq "y") {
 else {
         Write-Host ("Detected non-confirmation input, exiting...")
     }
-}
