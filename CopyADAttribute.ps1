@@ -9,7 +9,7 @@ catch
 }
 
     Clear-Host
-    Write-Host ("This script copies an AD attribute from one field to another, for all users that have data in the source field.")
+    Write-Host ("This script copies an AD attribute from one field to another, for all users that have data in the source field. Please ensure the parameters are entered correctly as they are not error checked.")
     $originalfield = Read-Host("What field would you like to read from?")
     $changefield = Read-Host("What field would you like to copy the data to?")
     $users = Get-ADUser -LDAPFilter "($originalfield=*)" -Properties $originalfield, $changefield
