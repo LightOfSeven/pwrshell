@@ -48,7 +48,7 @@ Else{
     Exit-PSSession
 }
 
-### Receives input from previous chain, applies appropriate aduit rules
+### Receives input from previous chain, applies appropriate audit rules
 foreach($folder in $folders)
 {
     try
