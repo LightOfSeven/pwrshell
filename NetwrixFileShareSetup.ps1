@@ -62,6 +62,7 @@ foreach($folder in $folders)
         }
         else{
         Write-Warning 'Share skipped due to missing path variable'
+        }
     }
     catch
     {
