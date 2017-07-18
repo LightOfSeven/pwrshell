@@ -4,10 +4,10 @@
 ### Use the -verbose switch on the ps1 script in order to show verbose errors
 ### Accompanying GPO also required for Windows Firewall, Services and Audit Policy settings
 
-$folders = Get-WmiObject -Query "SELECT Path FROM Win32_Share"
+$folders = Get-WmiObject -Class Win32_Share | Where-Object {($_.name -notlike 'C$' -and $_.name -notlike 'ADMIN$') -and $_.name -notlike 'IPC$'}
 
 ### You can specify the domain, otherwise the current account's domain is used. e.g. domain\username
-$user = "NetwrixAuditor"
+$user = "ServiceNetwrix"
 Write-verbose "$user is selected as the user account for Audit Permissions"
 
 ### If/Elseif/Else chain will allow the user to choose the mode used for auditing.
@@ -53,12 +53,15 @@ foreach($folder in $folders)
 {
     try
     {
-        $ACL = $folder | Get-Acl -Audit -ErrorAction Stop
-
-        $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"None","None",$AuditType)
-        $ACL.SetAuditRule($AuditRules)
-        $ACL | Set-Acl $Folder -ErrorAction Stop
+        if ($folder.Path -ne $null) {
+        $ACL =  Get-Acl -Audit -Path $folder.Path -ErrorAction Stop
+        $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"ObjectInherit","None",$AuditType)
+        $ACL.AddAuditRule($AuditRules)
+        $ACL | Set-Acl -path $Folder.Path -ErrorAction Stop
         Write-Verbose "Setting Audit Rules on $folder"
+        }
+        else{
+        Write-Warning 'Share skipped due to missing path variable'
     }
     catch
     {
@@ -69,12 +72,13 @@ foreach($folder in $folders)
 Try{
 ### A Try/Catch block to enable remote registry automatic startup and start the service
 Write-Verbose 'Verifying if Remote Registry service is available'
-Get-Service -Name 'RemoteRegsitry' -ErrorAction Stop
+Get-Service -Name 'RemoteRegistry' -ErrorAction Stop
 Write-Verbose 'Updating the startup type of the Remote Registry service'
 Set-Service -Name 'RemoteRegistry' -StartupType automatic -ErrorAction Stop
-Write-Verbose 'Starting Remote Registry' 
+Write-Host "`nStarting Remote Registry`n" 
 Start-Service -Name 'RemoteRegistry' -ErrorAction Stop
 Write-Verbose 'No errors in RemoteRegistry processing, service successfully altered'
+Get-Service -Name 'RemoteRegistry' -ErrorAction Stop
 }
 Catch{
 Write-Warning "Error with Remote Registry:`n$_`n"
