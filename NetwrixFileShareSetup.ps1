@@ -1,6 +1,6 @@
 ### NetwrixScript for enabling File Servers to work with Netrix Auditor. Windows Server 2012 and above.
 ### User account must be created first in AD 
-### Script seeks for all hidden and visible SMB Shares and adds the requested permissions - also starts RemoteRegistry and sets to Automatic start
+### Script seeks for hidden and visible SMB Shares and adds the requested permissions, unless it is an Administrative share - also starts RemoteRegistry and sets to Automatic start
 ### Use the -verbose switch on the ps1 script in order to show verbose errors
 ### Accompanying GPO also required for Windows Firewall, Services and Audit Policy settings
 
@@ -15,7 +15,7 @@ Write-verbose "$user is selected as the user account for Audit Permissions"
 $input = Read-Host "Please enter one of the following Audit Modes:`nSuccessfulReads`nSuccessfulChanges`nFailedReads`nFailedChangeAttempts`nFailedAll`nAll`n"
 if ($input -eq 'SuccessfulReads'){
     $AuditMode = 'ReadData'
-    $AuditType = 'All'
+    $AuditType = 'Success'
 }
 ElseIf($input -eq 'SuccessfulChanges'){
     $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership'
@@ -35,7 +35,6 @@ ElseIf($input -eq 'FailedAll'){
 }
 ElseIf($input -eq 'All'){
     $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership', 'ReadData'
-    $AuditType = 'All'
     Write-host 'This configuration will place a heavier load on the Netwrix Server and DB than may be intended. Continue?' -ForegroundColor Red
     $continue = Read-Host 'Select: [Y]/[N]'
     if ($continue -ne 'Y'){
@@ -54,15 +53,25 @@ foreach($folder in $folders)
     try
     {
         if ($folder.Path -ne $null) {
-        $ACL =  Get-Acl -Audit -Path $folder.Path -ErrorAction Stop
-        $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"ObjectInherit","None",$AuditType)
-        $ACL.AddAuditRule($AuditRules)
-        $ACL | Set-Acl -path $Folder.Path -ErrorAction Stop
-        Write-Verbose "Setting Audit Rules on $folder"
+            if ($input -ne 'All') {
+                    $ACL =  Get-Acl -Audit -Path $folder.Path -ErrorAction Stop
+                    $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"ObjectInherit","InheritOnly",$AuditType)
+                    $ACL.AddAuditRule($AuditRules)
+                    $ACL | Set-Acl -path $Folder.Path -ErrorAction Stop
+                    Write-Verbose "Setting Audit Rules on $folder"
+            }
+            Else{
+                    $ACL =  Get-Acl -Audit -Path $folder.Path -ErrorAction Stop
+                    $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"ObjectInherit","InheritOnly",'Success')
+                    $ACL.AddAuditRule($AuditRules)
+                    $ACL | Set-Acl -path $Folder.Path -ErrorAction Stop
+                    $AuditRules = New-Object System.Security.AccessControl.FileSystemAuditRule($user,$AuditMode,"ObjectInherit","InheritOnly",'Fail')
+                    $ACL.AddAuditRule($AuditRules)
+                    $ACL | Set-Acl -path $Folder.Path -ErrorAction Stop
+                    Write-Verbose "Setting Audit Rules on $folder"
+            }
         }
-        else{
-        Write-Warning 'Share skipped due to missing path variable'
-        }
+    
     }
     catch
     {
