@@ -1,5 +1,5 @@
 ### NetwrixScript for enabling File Servers to work with Netrix Auditor. Windows Server 2012 and above.
-### User account must be created first in AD 
+### User variable is which user/group of users you want to monitor for changes, not who has read access!
 ### Script seeks for hidden and visible SMB Shares and adds the requested permissions, unless it is an Administrative share - also starts RemoteRegistry and sets to Automatic start
 ### Use the -verbose switch on the ps1 script in order to show verbose errors
 ### Accompanying GPO also required for Windows Firewall, Services and Audit Policy settings
