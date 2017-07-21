@@ -6,9 +6,9 @@
 
 $folders = Get-WmiObject -Class Win32_Share | Where-Object {($_.name -notlike 'C$' -and $_.name -notlike 'ADMIN$') -and $_.name -notlike 'IPC$'}
 
-### You can specify the domain, otherwise the current account's domain is used. e.g. domain\username
-$user = "ServiceNetwrix"
-Write-verbose "$user is selected as the user account for Audit Permissions"
+### You can specify the domain, otherwise the current group/accounts's domain is used. e.g. domain\username
+$user = "Everyone"
+Write-verbose "$user is selected as group to monitor"
 
 ### If/Elseif/Else chain will allow the user to choose the mode used for auditing.
 ### Refer to Configure Object-Level Access Auditing documentation for further information.
