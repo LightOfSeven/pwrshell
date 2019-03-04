@@ -34,6 +34,15 @@ if (Get-Module -ListAvailable -Name "PSReadline") {
 # Coloured get-time 
 # http://stackoverflow.com/questions/138144/what-s-in-your-powershell-profile-ps1-file
 function Get-Time { return $(get-date | foreach-object  { $_.ToLongTimeString() } ) }
+
+# Print PS Version
+$major = (Get-Host).Version.Major
+$major = "$major" + "."
+$minor = (Get-Host).Version.Minor
+Write-Host "PowerShell v$major$minor"
+Remove-Variable major
+Remove-Variable minor
+
 function prompt
 {
     # Write the time 
@@ -55,7 +64,7 @@ Write-Host -ForegroundColor Red $(Get-Location) $hr
 Set-Alias im Import-Module
 
 # Delete ls alias so we can use it with some more 'flair' 
-del alias:ls -Force
+Remove-Item alias:ls -Force
 
 # Coloured LS
 function ls
@@ -100,9 +109,23 @@ function la { Get-ChildItem -force }
 
 # Change title of the prompt
 $host.ui.RawUI.WindowTitle = "Running as user $env:UserName"
+if( (
+    New-Object Security.Principal.WindowsPrincipal (
+        [Security.Principal.WindowsIdentity]::GetCurrent())
+    ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+{
+    # Admin-mark in WindowTitle
+    $Host.UI.RawUI.WindowTitle = "[Admin] " + $Host.UI.RawUI.WindowTitle
+
+    # Admin-mark on prompt
+    Write-Host "[" -nonewline -foregroundcolor DarkGray
+    Write-Host "Admin" -nonewline -foregroundcolor Red
+    Write-Host "] " -nonewline -foregroundcolor DarkGray
+}
 
 # Import Exchange Online cmdlets
-Import-Module $((Get-ChildItem -Path $($env:LOCALAPPDATA+"\Apps\2.0\") -Filter Microsoft.Exchange.Management.ExoPowershellModule.dll -Recurse ).FullName|?{$_ -notmatch "_none_"}|select -First 1)
+Import-Module $((Get-ChildItem -Path $($env:LOCALAPPDATA+"\Apps\2.0\") -Filter Microsoft.Exchange.Management.ExoPowershellModule.dll -Recurse ).FullName|
+Where-Object{$_ -notmatch "_none_"}|Select-Object -First 1)
 
 function Connect-Exchange () {
     [CmdletBinding()]
@@ -121,4 +144,4 @@ function Connect-Exchange () {
     }
 }
 
-cd c:\
+Set-Location c:\
