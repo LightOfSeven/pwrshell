@@ -1,3 +1,10 @@
+<#
+.SYNOPSIS 
+– This script mutes the PC audio
+.DESCRIPTION 
+– I run this on screen lock events from Task Scheduler - this is because the screen forces the audio source to swap to speakers when the PC is locked. Quick workaround.
+#>
+
 Add-Type -TypeDefinition @'
 using System.Runtime.InteropServices;
 
