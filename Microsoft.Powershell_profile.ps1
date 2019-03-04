@@ -31,7 +31,7 @@ if (Get-Module -ListAvailable -Name "PSReadline") {
     $options.VariableForegroundColor = 'Green'
 }
 
-# Coloured get-time 
+# get-time 
 # http://stackoverflow.com/questions/138144/what-s-in-your-powershell-profile-ps1-file
 function Get-Time { return $(get-date | foreach-object  { $_.ToLongTimeString() } ) }
 
