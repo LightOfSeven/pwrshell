@@ -90,6 +90,7 @@ function ls
             ".xml" {$host.ui.rawui.foregroundColor = "Cyan"}
             ".log" {$host.ui.rawui.foregroundColor = "Cyan"}
             ".conf" {$host.ui.rawui.foregroundColor = "Cyan"}
+            ".sys" {$host.ui.rawui.foregroundColor = "Gray"}
             Default {$host.ui.rawui.foregroundColor = $origFg} 
         } 
         if ($item.Mode.StartsWith("d")) {$host.ui.rawui.foregroundColor = "Green"}
