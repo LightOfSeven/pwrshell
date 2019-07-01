@@ -17,7 +17,7 @@ Decimal # |Hex #	| Official meaning	| Script's meaning
 3011| 0x00000BC3    | The requested operation is successful. Changes will not be effective until the service is restarted. | Manual visit required; TPM needed a restart so likely the script will need to be rerun in order to apply Bitlocker
 #>
 
-Start-Transcript -Path "C:\scripts\bitlocker-ps-transcript-v5.txt" -IncludeInvocationHeader -Force
+Start-Transcript -Path "C:\scripts\bitlocker-ps-transcript.txt" -IncludeInvocationHeader -Force
 
 $CustomErrorCode = 0
 $Hostname = $env:ComputerName
