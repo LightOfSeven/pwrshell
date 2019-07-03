@@ -3,7 +3,7 @@
 ## What are you doing?!
 
 The purpose of this repository is to act as a bit of a demo space. When we publish things online, it's unlikely we're going to make the big time and have pull requests flying about.
-Rather than aim there with such limited coding knowledge and little in the way of ambitions for an Open Source project, I hope anyone stumbling upon this instead sees what the beginnings of a journey into a scripting language can contain. I've begun separating the random bits of code flying about into purposes, such as a Word of the Day script I've been using for donkeys that just pops up a word each login in my Scheduled Tasks.
+Rather than aim there with such limited coding knowledge and little in the way of ambitions for an Open Source project, I hope anyone stumbling upon this instead sees what the beginnings of a journey into a scripting language can contain. I've begun separating the random bits of code into purposes, such as a Word of the Day script I've been using for donkeys that just pops up a word each login in my Scheduled Tasks.
 
 Hopefully this is useful for someone out there. If not, it's at least good practise for me! 
 
