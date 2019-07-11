@@ -9,6 +9,8 @@ Hopefully this is useful for someone out there. If not, it's at least good pract
 
 ## What's in this place?
 Okay, so we've got:
+* AWS - A couple of scripts to cleanly connect using menu based profile / region selectors, also checks versions of module and updates
+* ActiveDirectory - A script to get the last 100 events matching ID 4624 from DCs and returns the IP & time a given user logged on with
 * Egnyte  - Simple connect script for their API
 * Messing Around  - Ways of doing bits to other computers (playing songs/sounds/showing jokes from a Chuck Norris API, etc.)
 * ScheduledTasks  - Things I run from Task Scheduler making my day easier / more engaging
