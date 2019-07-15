@@ -10,41 +10,28 @@ $folders = Get-WmiObject -Class Win32_Share | Where-Object {($_.name -notlike 'C
 $user = "Everyone"
 Write-verbose "$user is selected as group to monitor"
 
-### If/Elseif/Else chain will allow the user to choose the mode used for auditing.
+### Switch will allow the user to choose the mode used for auditing.
 ### Refer to Configure Object-Level Access Auditing documentation for further information.
 $input = Read-Host "Please enter one of the following Audit Modes:`nSuccessfulReads`nSuccessfulChanges`nFailedReads`nFailedChangeAttempts`nFailedAll`nAll`n"
-if ($input -eq 'SuccessfulReads'){
-    $AuditMode = 'ReadData'
-    $AuditType = 'Success'
-}
-ElseIf($input -eq 'SuccessfulChanges'){
-    $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership'
-    $AuditType = 'Success'
-}
-ElseIf($input -eq 'FailedReads'){
-    $AuditMode = 'ReadData'
-    $AuditType = 'Fail'
-}
-ElseIf($input -eq 'FailedChangeAttempts'){
-    $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership'
-    $AuditType = 'Fail'
-}
-ElseIf($input -eq 'FailedAll'){
-    $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership', 'ReadData'
-    $AuditType = 'Fail'
-}
-ElseIf($input -eq 'All'){
-    $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership', 'ReadData'
-    Write-host 'This configuration will place a heavier load on the Netwrix Server and DB than may be intended. Continue?' -ForegroundColor Red
-    $continue = Read-Host 'Select: [Y]/[N]'
-    if ($continue -ne 'Y'){
-        Write-Host 'Exiting script...'
+switch($input){
+    'SuccessfulReads' {$AuditMode = 'ReadData'; $AuditType = 'Success'}
+    'SuccessfulChanges' {$AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership'; $AuditType = 'Success'}
+    'FailedReads' {$AuditMode = 'ReadData'; $AuditType = 'Fail'}
+    'FailedChangeAttempts' {$AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership'; $AuditType = 'Fail'}
+    'FailedAll' {$AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership', 'ReadData'; $AuditType = 'Fail'}
+    'All' {
+        $AuditMode = 'DeleteSubdirectoriesAndFiles', 'Write', 'Delete', 'ChangePermissions', 'TakeOwnership', 'ReadData'
+        Write-Warning 'This configuration will place a heavier load on the Netwrix Server and DB than may be intended. Continue?'
+        $continue = Read-Host 'Select: [Y]/[N]'
+        if ($continue -ne 'Y'){
+            Write-Host 'Exiting script...'
+            Exit-PSSession
+        }
+    }
+    Default {
+        Write-Host 'Input not recognised. Script will exit, please enter the exact Audit Mode (no spaces) to proceed on next run. Case-insensitive!'
         Exit-PSSession
     }
-}
-Else{
-    Write-Host 'Input not recognised. Script will exit, please enter the exact Audit Mode (no spaces) to proceed on next run. Case-insensitive!'
-    Exit-PSSession
 }
 
 ### Receives input from previous chain, applies appropriate audit rules
