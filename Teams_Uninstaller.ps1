@@ -10,7 +10,9 @@ Stop-Process -Name "Teams.exe" -Force -ErrorAction SilentlyContinue
 
 # Run the removal from AppData on all users
 ForEach($User in $AllUsersAppdataPath){
-        try{
+    $TeamsPath = [System.IO.Path]::Combine($User, 'AppData', 'Local', 'Microsoft', 'Teams')
+    $TeamsUpdateExePath = [System.IO.Path]::Combine($User, 'AppData', 'Local', 'Microsoft', 'Teams', 'Update.exe')
+    try{
         if (Test-Path -Path $TeamsUpdateExePath) {
             Write-Output "Uninstalling Teams process"
             # Uninstall app
