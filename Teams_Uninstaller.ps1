@@ -7,9 +7,28 @@ $UsersRoot = [System.IO.Path]::Combine(($env:Public).trimend("\Public"))
 $AllUsersPath = Get-ChildItem $UsersRoot
 $Users = $AllUsersPath.FullName
 # Stop the process if it's running
-# Stop-Process -Name "Teams.exe" -Force -ErrorAction SilentlyContinue
+Stop-Process -Name "Teams.exe" -Force -ErrorAction SilentlyContinue
 
-# Run the removal from AppData on all users
+# Get the registry from 32 and 64bit uninstaller records
+# Find if anything matches the name Teams Machine Wide Installer  
+$uninstall32 = gci "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -like "*Teams Machine-Wide Installer*" } | select UninstallString
+$uninstall64 = gci "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" | foreach { gp $_.PSPath } | ? { $_ -like "*Teams Machine-Wide Installer*" } | select UninstallString
+
+# Run msiexec uninstall silently if either registry path has an uninstall string present
+if ($uninstall64) {
+    $uninstall64 = $uninstall64.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+    $uninstall64 = $uninstall64.Trim()
+    Write-Output "Found Teams Machine Wide Installer (64bit) - uninstalling..."
+    Start-Process "msiexec.exe" -arg "/X $uninstall64 /qb" -Wait
+}
+if ($uninstall32) {
+    $uninstall32 = $uninstall32.UninstallString -Replace "msiexec.exe","" -Replace "/I","" -Replace "/X",""
+    $uninstall32 = $uninstall32.Trim()
+    Write-Output "Found Teams Machine Wide Installer (32bit) - uninstalling..."
+    Start-Process "msiexec.exe" -arg "/X $uninstall32 /qb" -Wait
+}
+
+# Run the uninstall and files removal from AppData on all users
 ForEach($User in $Users){
     $TeamsPath = Convert-Path "$user\AppData\Local\Microsoft\Teams" -ErrorAction SilentlyContinue
     $TeamsUpdateExePath = "$TeamsPath\Update.exe"
