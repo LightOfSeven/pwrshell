@@ -98,20 +98,22 @@ if($BitlockerStatus.VolumeStatus -notlike "FullyEncrypted"){
             try {
                 Write-Output "Backing up the Recovery to AD."
                 Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
-                
                 #Due to our Group Policy not allowing Bitlocker to be enabled if it cannot backup to AD, we only try enabling if the backup is successful
-                try {
-                    Write-Output "Enabling Encryption"
-                    Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
-                }
-                catch {
-                    Write-Error "Error enabling Bitlocker"
-                    $CustomErrorCode = 82
-                    Exit $CustomErrorCode
-                }
+                Write-Output "Enabling Encryption"
+                Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
             }
-            catch {
-                Write-Error "Unable to save Bitlocker key protector to AD"
+            catch [System.IO.FileNotFoundException]{
+                Write-Output "There was an issue with the ReAgent.xml file, attempting rename and retry"
+                Rename-Item -Path "C:\Windows\System32\Recovery\ReAgent.xml" -NewName "ReAgent.xml.old" -Force
+                # retrying
+                Write-Output "Backing up the Recovery to AD."
+                Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
+                Write-Output "Enabling Encryption"
+                Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
+            }
+            catch{  
+                Write-Error "Error enabling Bitlocker"
+                Write-Error "Unable to save Bitlocker key protector to AD or there was an issue with the ReAgent file that could not be resolved"
                 $CustomErrorCode = 58
                 Exit $CustomErrorCode
             }
