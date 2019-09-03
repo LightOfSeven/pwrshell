@@ -101,6 +101,7 @@ if($BitlockerStatus.VolumeStatus -notlike "FullyEncrypted"){
             #>
             while($RecoveryKeyGUID.Count -gt 1){
                 Remove-BitlockerKeyProtector -KeyProtectorId $RecoveryKeyGUID[1] -Mountpoint C:
+                $RecoveryKeyGUID = (Get-BitLockerVolume -MountPoint $env:SystemDrive).keyprotector | Where-Object {$_.Keyprotectortype -eq 'RecoveryPassword'} | Select-Object -ExpandProperty KeyProtectorID
             }
             try {
                 Write-Output "Backing up the Recovery to AD."
