@@ -94,7 +94,14 @@ if($BitlockerStatus.VolumeStatus -notlike "FullyEncrypted"){
 
             Write-Output "Getting Recovery Key GUID"
             $RecoveryKeyGUID = (Get-BitLockerVolume -MountPoint $env:SystemDrive).keyprotector | Where-Object {$_.Keyprotectortype -eq 'RecoveryPassword'} | Select-Object -ExpandProperty KeyProtectorID
-
+            <#
+            Sometimes when this script is run multiple times without reboot, multiple keyprotectors
+            can exist at once on the drive. This is corrected by looping through and removing the
+            protectors until only 1 remains in the variable            
+            #>
+            while($RecoveryKeyGUID.Count -gt 1){
+                Remove-BitlockerKeyProtector -KeyProtectorId $RecoveryKeyGUID[1]
+            }
             try {
                 Write-Output "Backing up the Recovery to AD."
                 Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
@@ -111,7 +118,7 @@ if($BitlockerStatus.VolumeStatus -notlike "FullyEncrypted"){
                 Write-Output "Enabling Encryption"
                 Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
             }
-            catch{  
+            catch{
                 Write-Error "Error enabling Bitlocker"
                 Write-Error "Unable to save Bitlocker key protector to AD or there was an issue with the ReAgent file that could not be resolved"
                 $CustomErrorCode = 58
