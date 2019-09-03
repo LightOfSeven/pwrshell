@@ -100,7 +100,7 @@ if($BitlockerStatus.VolumeStatus -notlike "FullyEncrypted"){
             protectors until only 1 remains in the variable            
             #>
             while($RecoveryKeyGUID.Count -gt 1){
-                Remove-BitlockerKeyProtector -KeyProtectorId $RecoveryKeyGUID[1]
+                Remove-BitlockerKeyProtector -KeyProtectorId $RecoveryKeyGUID[1] -Mountpoint C:
             }
             try {
                 Write-Output "Backing up the Recovery to AD."
