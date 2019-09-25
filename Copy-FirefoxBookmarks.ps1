@@ -17,7 +17,7 @@ function Copy-FirefoxBookmarks{
         $ProfileName = $DefaultProfile.split("/")[1]
         $FileToCopy = Get-ChildItem -Path "$FirefoxPath\Profiles\$ProfileName" -recurse | Where-Object{$_.Name -like "places.sqlite"}
         try{
-            Copy-Item -Path $FileToCopy -Destination $FileDestination
+            Copy-Item -Path $FileToCopy.fullname -Destination $FileDestination
         }
         catch{
             Write-Warning "Error copying!"
