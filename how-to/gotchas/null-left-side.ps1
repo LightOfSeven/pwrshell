@@ -36,15 +36,15 @@ $demo -eq $null
 $demo = $null
 $null -eq $demo
  
-# Returns false
+# Returns $false
 $demo = 1,2,3
 $null -eq $demo
 
-# Returns false
+# Returns $false
 $demo = 1,2,$null,3,4
 $null -eq $demo
  
-# Returns false
+# Returns $false
 $demo = 1,2,$null,3,4,$null,5
 $null -eq $demo
 
