@@ -104,10 +104,10 @@ if($BitlockerStatus[0].ProtectionStatus -notlike "On"){
                     $RecoveryKeyGUID = (Get-BitLockerVolume -MountPoint $env:SystemDrive).keyprotector | Where-Object {$_.Keyprotectortype -eq 'RecoveryPassword'} | Select-Object -ExpandProperty KeyProtectorID
                 }
                 try {
-                    Write-Output "Backing up the Recovery to AD."
+                    Write-Output "1st attempt: Backing up the Recovery to AD."
                     Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
                     #Due to our Group Policy not allowing Bitlocker to be enabled if it cannot backup to AD, we only try enabling if the backup is successful
-                    Write-Output "Enabling Encryption"
+                    Write-Output "No error during backup, attempting to enable encryption"
                     Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
                     Write-Output "Bitlocker is now enabled and active. Success! Reboot required."
                 }
@@ -115,10 +115,17 @@ if($BitlockerStatus[0].ProtectionStatus -notlike "On"){
                     Write-Output "There was an issue with the ReAgent.xml file, attempting rename and retry"
                     Rename-Item -Path "C:\Windows\System32\Recovery\ReAgent.xml" -NewName "ReAgent.xml.old" -Force
                     # retrying
-                    Write-Output "Backing up the Recovery to AD."
-                    Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
-                    Write-Output "Enabling Encryption"
-                    Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
+                    try{
+                        Write-Output "2nd attempt: Backing up the Recovery to AD."
+                        Backup-BitLockerKeyProtector -MountPoint $env:SystemDrive -KeyProtectorId $RecoveryKeyGUID
+                        Write-Output "No error during backup, attempting to enable encryption"
+                        Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly
+                    }
+                    catch{
+                        Write-Error "Error enabling Bitlocker"
+                        Write-Error "There was no access to AD during the backup attempt"
+                        $CustomErrorCode = 58
+                    }
                 }
                 catch{
                     Write-Error "Error enabling Bitlocker"
