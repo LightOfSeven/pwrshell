@@ -1,6 +1,5 @@
 # A function to show a menu
 # Originally for an AWS selection of subnet / region during a lab
-# TODO: Remove "Press Enter to continue...:" prompt unexpectedly appearing
 
 function Show-Menu {
     param (
